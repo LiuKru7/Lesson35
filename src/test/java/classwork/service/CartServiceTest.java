@@ -21,7 +21,7 @@ class CartServiceTest {
                 new ItemDTO(2, "Smartphone", 700.0, 2)
         );
 
-        List<ItemDTO> itemsCart2 = Arrays.asList(
+        List<ItemDTO> itemsCart2 = List.of(
                 new ItemDTO(3, "Toaster", 30.0, 1)
         );
 

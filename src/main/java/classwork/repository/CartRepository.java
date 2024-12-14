@@ -5,7 +5,6 @@ import classwork.dto.ItemDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class CartRepository {
@@ -141,7 +140,7 @@ public class CartRepository {
         return null;
     }
 
-    public List<CartDTO> getAllCarts() {
+    public List<CartDTO> getAllCarts2() {
         List<CartDTO> cartList = new ArrayList<>();
         String cartSql = "SELECT * FROM cart";
         String itemSql = "SELECT * FROM item WHERE cart_id = ?";
@@ -175,8 +174,48 @@ public class CartRepository {
             throw new RuntimeException(e);
         }
 
-        return cartList; // This is now placed after the loop.
+        return cartList;
     }
 
+    public List<CartDTO> getAllCarts() {
+        String sql = """
+                SELECT c.cart_id, c.cart_name,
+                       i.item_id, i.item_name, i.price, i.quantity
+                FROM cart c
+                LEFT JOIN item i ON c.cart_id = i.cart_id
+                ORDER BY c.cart_id
+                """;
 
+        List<CartDTO> carts = new ArrayList<>();
+
+        try (Connection connection = DatabaseRepository.getConnection()) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            CartDTO currentCart = null;
+            while (rs.next()) {
+                int cartId = rs.getInt("cart_id");
+                if (currentCart == null || currentCart.getCartId() != cartId) {
+                    currentCart = new CartDTO();
+                    currentCart.setCartId(cartId);
+                    currentCart.setCartName(rs.getString("cart_name"));
+                    currentCart.setItems(new ArrayList<>());
+                    carts.add(currentCart);
+                }
+
+                int itemId = rs.getInt("item_id");
+                if (!rs.wasNull()) {
+                    ItemDTO item = new ItemDTO();
+                    item.setItemId(itemId);
+                    item.setItemName(rs.getString("item_name"));
+                    item.setPrice(rs.getDouble("price"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    currentCart.getItems().add(item);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return carts;
+    }
 }
