@@ -1,6 +1,7 @@
 package classwork;
 
 import classwork.dto.CartDTO;
+import classwork.json_service.JsonService;
 import classwork.repository.CartRepository;
 import classwork.service.CartService;
 
@@ -26,22 +27,18 @@ public class Main {
         cartsFromDb = cartRepository.getAllCarts();
 
         cartService.filterItemsByPrice(cartsFromDb, 100.0).forEach(System.out::println);
-        System.out.println("All names:");
+        System.out.println("All items names:");
         cartService.getAllItemsNames(cartsFromDb).forEach(System.out::println);
 
-        System.out.println("Total cost");
-        System.out.println(cartService.calculateCartTotalCost(cartRepository.getCart(2)));
+        System.out.println("Cart total cost:  " + cartService.calculateCartTotalCost(cartRepository.getCart(3)));
 
-        System.out.println("Count item per cart");
+        System.out.println("Count item per cart: ");
         System.out.println( cartService.countItemsPerCart(cartsFromDb));
 
-        System.out.println("Expensive item");
+        System.out.println("Expensive item: ");
         System.out.println(cartService.findMostExpensiveItem(carts));
 
         System.out.println("Items names: ");
         System.out.println(cartService.getDistinctItemNames(carts));
-
-
-
     }
 }

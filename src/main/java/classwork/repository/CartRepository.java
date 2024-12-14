@@ -57,7 +57,6 @@ public class CartRepository {
             throw new RuntimeException(e);
         }
     }
-
     public void dropItemTable() {
         String sql = "DROP TABLE IF EXISTS item;";
         try (Connection connection = DatabaseRepository.getConnection()) {
@@ -87,10 +86,9 @@ public class CartRepository {
                             itemPs.setDouble(2, item.getPrice());
                             itemPs.setInt(3, item.getQuantity());
                             itemPs.setInt(4, cartId);
-                            // itemPs.addBatch();
-                            itemPs.executeUpdate();
+                            itemPs.addBatch();
                         }
-                        // itemPs.executeBatch();
+                         itemPs.executeBatch();
                     }
                 }
             }
@@ -99,83 +97,46 @@ public class CartRepository {
         }
     }
 
-    public CartDTO getCart(int cart_id) {
-        String cartSql = "SELECT * FROM cart WHERE cart_id = ?";
-        String itemSql = "SELECT * FROM item WHERE cart_id = ?";
+public CartDTO getCart(int cart_id) {
+    String sql = """
+        SELECT c.cart_id, c.cart_name,
+               i.item_id, i.item_name, i.price, i.quantity
+        FROM cart c
+        LEFT JOIN item i ON c.cart_id = i.cart_id
+        WHERE c.cart_id = ?
+        ORDER BY i.item_id
+    """;
 
-        try (Connection connection = DatabaseRepository.getConnection()) {
-            PreparedStatement cartPs = connection.prepareStatement(cartSql);
-            cartPs.setInt(1, cart_id);
-            ResultSet cartRs = cartPs.executeQuery();
+    CartDTO cart = null;
 
-            if (cartRs.next()) {
-                CartDTO cartDTO = new CartDTO();
-                cartDTO.setCartName(cartRs.getString("cart_name"));
-                cartDTO.setCartId(cartRs.getInt("cart_id"));
+    try (Connection connection = DatabaseRepository.getConnection()) {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, cart_id);
+        ResultSet rs = ps.executeQuery();
 
-                PreparedStatement itemPs = connection.prepareStatement(itemSql);
-                itemPs.setInt(1, cart_id);
-                ResultSet itemRs = itemPs.executeQuery();
-
-                List<ItemDTO> items = new ArrayList<>();
-
-                while (itemRs.next()) {
-                    ItemDTO item = new ItemDTO();
-                    item.setItemId(itemRs.getInt("item_id"));
-                    item.setItemName(itemRs.getString("item_name"));
-                    item.setPrice(itemRs.getDouble("price"));
-                    item.setQuantity(itemRs.getInt("quantity"));
-
-                    items.add(item);
-                }
-
-                cartDTO.setItems(items);
-
-                return cartDTO;
+        while (rs.next()) {
+            if (cart == null) {
+                cart = new CartDTO();
+                cart.setCartId(rs.getInt("cart_id"));
+                cart.setCartName(rs.getString("cart_name"));
+                cart.setItems(new ArrayList<>());
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+            int itemId = rs.getInt("item_id");
+            if (!rs.wasNull()) {
+                ItemDTO item = new ItemDTO();
+                item.setItemId(itemId);
+                item.setItemName(rs.getString("item_name"));
+                item.setPrice(rs.getDouble("price"));
+                item.setQuantity(rs.getInt("quantity"));
+                cart.getItems().add(item);
+            }
         }
-
-        return null;
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
     }
-
-    public List<CartDTO> getAllCarts2() {
-        List<CartDTO> cartList = new ArrayList<>();
-        String cartSql = "SELECT * FROM cart";
-        String itemSql = "SELECT * FROM item WHERE cart_id = ?";
-
-        try (Connection connection = DatabaseRepository.getConnection()) {
-            Statement cartStatement = connection.createStatement();
-            ResultSet cartRs = cartStatement.executeQuery(cartSql);
-            while (cartRs.next()) {
-                CartDTO cartDTO = new CartDTO();
-                cartDTO.setCartName(cartRs.getString("cart_name"));
-                cartDTO.setCartId(cartRs.getInt("cart_id"));
-                cartList.add(cartDTO);
-            }
-            PreparedStatement itemPs = connection.prepareStatement(itemSql);
-            for (CartDTO cart : cartList) {
-                itemPs.setInt(1, cart.getCartId());
-                ResultSet itemRs = itemPs.executeQuery();
-
-                List<ItemDTO> items = new ArrayList<>();
-                while (itemRs.next()) {
-                    ItemDTO item = new ItemDTO();
-                    item.setItemId(itemRs.getInt("item_id"));
-                    item.setItemName(itemRs.getString("item_name"));
-                    item.setPrice(itemRs.getDouble("price"));
-                    item.setQuantity(itemRs.getInt("quantity"));
-                    items.add(item);
-                }
-                cart.setItems(items);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return cartList;
-    }
+    return cart;
+}
 
     public List<CartDTO> getAllCarts() {
         String sql = """
@@ -185,13 +146,10 @@ public class CartRepository {
                 LEFT JOIN item i ON c.cart_id = i.cart_id
                 ORDER BY c.cart_id
                 """;
-
         List<CartDTO> carts = new ArrayList<>();
-
         try (Connection connection = DatabaseRepository.getConnection()) {
             PreparedStatement ps = connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-
             CartDTO currentCart = null;
             while (rs.next()) {
                 int cartId = rs.getInt("cart_id");
@@ -202,7 +160,6 @@ public class CartRepository {
                     currentCart.setItems(new ArrayList<>());
                     carts.add(currentCart);
                 }
-
                 int itemId = rs.getInt("item_id");
                 if (!rs.wasNull()) {
                     ItemDTO item = new ItemDTO();

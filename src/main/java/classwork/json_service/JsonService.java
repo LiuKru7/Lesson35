@@ -1,4 +1,4 @@
-package classwork;
+package classwork.json_service;
 
 import classwork.dto.CartDTO;
 import com.fasterxml.jackson.core.type.TypeReference;

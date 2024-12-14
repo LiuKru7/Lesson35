@@ -23,7 +23,7 @@ public class CartService {
     }
     public double calculateCartTotalCost (CartDTO cart) {
         return cart.getItems().stream()
-                .mapToDouble(ItemDTO::getPrice)
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
     }
     public Optional<ItemDTO> findMostExpensiveItem(List<CartDTO> carts) {

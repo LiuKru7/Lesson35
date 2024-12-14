@@ -53,7 +53,7 @@ class CartServiceTest {
     @Test
     void testCalculateCartTotalCost() {
         double totalCost = cartService.calculateCartTotalCost(testCarts.get(0));
-        assertEquals(1700.0, totalCost);
+        assertEquals(2400, totalCost);
 
     }
 
