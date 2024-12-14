@@ -1,0 +1,110 @@
+[
+  {
+    "cartId": 1,
+    "cartName": "John's Cart",
+    "items": [
+      {
+        "itemId": 1,
+        "itemName": "Laptop",
+        "price": 1200.50,
+        "quantity": 1
+      },
+      {
+        "itemId": 2,
+        "itemName": "Mouse",
+        "price": 25.75,
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "cartId": 2,
+    "cartName": "Emily's Cart",
+    "items": [
+      {
+        "itemId": 3,
+        "itemName": "Desk Chair",
+        "price": 150.00,
+        "quantity": 1
+      },
+      {
+        "itemId": 4,
+        "itemName": "Notebook",
+        "price": 5.99,
+        "quantity": 5
+      },
+      {
+        "itemId": 5,
+        "itemName": "Pen Set",
+        "price": 12.99,
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "cartId": 3,
+    "cartName": "Sophia's Cart",
+    "items": [
+      {
+        "itemId": 6,
+        "itemName": "Headphones",
+        "price": 85.99,
+        "quantity": 1
+      },
+      {
+        "itemId": 7,
+        "itemName": "Portable Charger",
+        "price": 19.99,
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "cartId": 4,
+    "cartName": "Michael's Cart",
+    "items": [
+      {
+        "itemId": 8,
+        "itemName": "Gaming Console",
+        "price": 499.99,
+        "quantity": 1
+      },
+      {
+        "itemId": 9,
+        "itemName": "Game Controller",
+        "price": 59.99,
+        "quantity": 2
+      },
+      {
+        "itemId": 10,
+        "itemName": "Game Disk",
+        "price": 39.99,
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "cartId": 5,
+    "cartName": "Lisa's Cart",
+    "items": [
+      {
+        "itemId": 11,
+        "itemName": "Coffee Maker",
+        "price": 75.00,
+        "quantity": 1
+      },
+      {
+        "itemId": 12,
+        "itemName": "Coffee Beans",
+        "price": 15.99,
+        "quantity": 2
+      },
+      {
+        "itemId": 13,
+        "itemName": "Coffee Mug",
+        "price": 9.99,
+        "quantity": 4
+      }
+    ]
+  }
+]
