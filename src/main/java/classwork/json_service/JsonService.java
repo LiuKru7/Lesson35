@@ -19,7 +19,7 @@ public class JsonService {
             });
             return carts;
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Error");
         }
         return  null;
     }
