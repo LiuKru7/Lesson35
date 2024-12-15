@@ -57,6 +57,7 @@ public class CartRepository {
             throw new RuntimeException(e);
         }
     }
+
     public void dropItemTable() {
         String sql = "DROP TABLE IF EXISTS item;";
         try (Connection connection = DatabaseRepository.getConnection()) {
@@ -82,11 +83,7 @@ public class CartRepository {
                     if (rs.next()) {
                         int cartId = rs.getInt(1);
                         for (ItemDTO item : cart.getItems()) {
-                            itemPs.setString(1, item.getItemName());
-                            itemPs.setDouble(2, item.getPrice());
-                            itemPs.setInt(3, item.getQuantity());
-                            itemPs.setInt(4, cartId);
-                            itemPs.addBatch();
+                            addItem(item, itemPs, cartId);
                         }
                          itemPs.executeBatch();
                     }
@@ -97,7 +94,15 @@ public class CartRepository {
         }
     }
 
-public CartDTO getCart(int cart_id) {
+    private void addItem(ItemDTO item, PreparedStatement itemPs, int cartId) throws SQLException {
+        itemPs.setString(1, item.getItemName());
+        itemPs.setDouble(2, item.getPrice());
+        itemPs.setInt(3, item.getQuantity());
+        itemPs.setInt(4, cartId);
+        itemPs.addBatch();
+    }
+
+    public CartDTO getCart(int cart_id) {
     String sql = """
         SELECT c.cart_id, c.cart_name,
                i.item_id, i.item_name, i.price, i.quantity
@@ -116,20 +121,12 @@ public CartDTO getCart(int cart_id) {
 
         while (rs.next()) {
             if (cart == null) {
-                cart = new CartDTO();
-                cart.setCartId(rs.getInt("cart_id"));
-                cart.setCartName(rs.getString("cart_name"));
-                cart.setItems(new ArrayList<>());
+                cart = createCartFromResultSet(rs);
             }
 
             int itemId = rs.getInt("item_id");
             if (!rs.wasNull()) {
-                ItemDTO item = new ItemDTO();
-                item.setItemId(itemId);
-                item.setItemName(rs.getString("item_name"));
-                item.setPrice(rs.getDouble("price"));
-                item.setQuantity(rs.getInt("quantity"));
-                cart.getItems().add(item);
+                populateItemFromResultSet(itemId, rs, cart);
             }
         }
     } catch (SQLException e) {
@@ -137,6 +134,24 @@ public CartDTO getCart(int cart_id) {
     }
     return cart;
 }
+
+    private static void populateItemFromResultSet(int itemId, ResultSet rs, CartDTO cart) throws SQLException {
+        ItemDTO item = new ItemDTO();
+        item.setItemId(itemId);
+        item.setItemName(rs.getString("item_name"));
+        item.setPrice(rs.getDouble("price"));
+        item.setQuantity(rs.getInt("quantity"));
+        cart.getItems().add(item);
+    }
+
+    private static CartDTO createCartFromResultSet(ResultSet rs) throws SQLException {
+        CartDTO cart;
+        cart = new CartDTO();
+        cart.setCartId(rs.getInt("cart_id"));
+        cart.setCartName(rs.getString("cart_name"));
+        cart.setItems(new ArrayList<>());
+        return cart;
+    }
 
     public List<CartDTO> getAllCarts() {
         String sql = """
@@ -154,25 +169,26 @@ public CartDTO getCart(int cart_id) {
             while (rs.next()) {
                 int cartId = rs.getInt("cart_id");
                 if (currentCart == null || currentCart.getCartId() != cartId) {
-                    currentCart = new CartDTO();
-                    currentCart.setCartId(cartId);
-                    currentCart.setCartName(rs.getString("cart_name"));
-                    currentCart.setItems(new ArrayList<>());
+                    currentCart = createCart(cartId, rs);
                     carts.add(currentCart);
                 }
                 int itemId = rs.getInt("item_id");
                 if (!rs.wasNull()) {
-                    ItemDTO item = new ItemDTO();
-                    item.setItemId(itemId);
-                    item.setItemName(rs.getString("item_name"));
-                    item.setPrice(rs.getDouble("price"));
-                    item.setQuantity(rs.getInt("quantity"));
-                    currentCart.getItems().add(item);
+                    populateItemFromResultSet(itemId, rs, currentCart);
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return carts;
+    }
+
+    private CartDTO createCart(int cartId, ResultSet rs) throws SQLException {
+        CartDTO currentCart;
+        currentCart = new CartDTO();
+        currentCart.setCartId(cartId);
+        currentCart.setCartName(rs.getString("cart_name"));
+        currentCart.setItems(new ArrayList<>());
+        return currentCart;
     }
 }

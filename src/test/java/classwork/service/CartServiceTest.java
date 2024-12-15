@@ -60,6 +60,7 @@ class CartServiceTest {
     @Test
     void testFindMostExpensiveItem() {
         Optional<ItemDTO> expensiveItem = cartService.findMostExpensiveItem(testCarts);
+        assertTrue(expensiveItem.isPresent());
         assertEquals(1000, expensiveItem.get().getPrice());
     }
 
