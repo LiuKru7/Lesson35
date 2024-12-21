@@ -182,7 +182,6 @@ public class CartRepository {
         }
         return carts;
     }
-
     private CartDTO createCart(int cartId, ResultSet rs) throws SQLException {
         CartDTO currentCart;
         currentCart = new CartDTO();
